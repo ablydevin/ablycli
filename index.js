@@ -36,18 +36,26 @@ program
   .description("Watch application events in real time")
   .action(async (app) => {
 
-    defaultColumnOptions.columns = ['name','data','transport']
-    console.log(columnify([], defaultColumnOptions))
+    defaultColumnOptions.columns = ['timestamp','name','transport']
+    console.log(columnify({}, defaultColumnOptions))
 
     //app connection events
     var connections = new EventSource(
       `https://realtime.ably.io/sse?v=1.2&channels=[app:${app}:meta]connection.lifecycle&key=${ABLY_API_KEY}`
     );
     connections.addEventListener("message", function (e) {
-      let data = JSON.parse(e.data);
+      let msg = JSON.parse(e.data);
+      //console.log(JSON.parse(msg.data).transport.type)
+      //map data object into a flattened display object
+      let mapped = {
+          timestamp: msg.timestamp,
+          name: msg.name,
+          transport: JSON.parse(msg.data).transport.type
+        }
+
       defaultColumnOptions.showHeaders = false;
       defaultColumnOptions.truncate = true;
-      console.log(columnify([data], defaultColumnOptions))
+      console.log(columnify([mapped], defaultColumnOptions))
       //console.log(e.data);
       //console.log(table.toString())
     });
