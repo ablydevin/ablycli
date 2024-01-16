@@ -30,7 +30,7 @@ program
   .action(async (app) =>  {
     console.log('Starting Watch')
     //app connection events
-    var connections = new EventSource(`https://realtime.ably.io/sse?v=1.2&channels=[app:${app}:meta]connection.lifecycle&key=fqOR-g.vL1AEQ:YqB33ug_1Eh1Wanqr2PG4B1qzPPtr78bc_h2ikhISaw`)
+    var connections = new EventSource(`https://realtime.ably.io/sse?v=1.2&channels=[app:${app}:meta]connection.lifecycle&key=`)
     connections.addEventListener('message', function (e) {
       console.log(e.data)
     })
@@ -43,7 +43,7 @@ program
     };
 
     //channel 
-    var channels = new EventSource(`https://realtime.ably.io/sse?v=1.2&channels=[app:${app}:meta]channel.lifecycle&key=fqOR-g.vL1AEQ:YqB33ug_1Eh1Wanqr2PG4B1qzPPtr78bc_h2ikhISaw`)
+    var channels = new EventSource(`https://realtime.ably.io/sse?v=1.2&channels=[app:${app}:meta]channel.lifecycle&key=`)
     channels.addEventListener('message', function (e) {
      console.log(e.data)
     })
