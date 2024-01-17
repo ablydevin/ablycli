@@ -1,20 +1,8 @@
-const { program } = require("commander");
-const columnify = require('columnify')
-const EventSource = require("eventsource");
-require('dotenv').config()
-//console.log(process.env)
-
-defaultColumnOptions = {
-  columnSplitter: ' | '
-}
-
-const STREAMING_DELAY_IN_SECONDS = 1;
-const ABLY_API_KEY = process.env.ABLY_API_KEY;
-
-const sleep = (ms) => {
-  //console.log(`sleeping`)
-  return new Promise((resolve) => setTimeout(resolve, ms));
-};
+import { program } from "commander";
+import 'dotenv/config'
+import { tailApplication } from "./tailApplication.js";
+import { tailChannels } from "./tailChannels.js";
+import { statsApplication } from "./statsApplication.js";
 
 program
   .name("ablycli")
@@ -22,68 +10,32 @@ program
   .description("A simple CLI application built with Node.js");
 
 program
-  .command("greet <name>")
-  .description("Greets the user with their name")
-  .action((name) => {
-    console.log(`Hello, ${name}!`);
+  //how do I add optional parameters like channel
+  .command("tail")
+  .argument("<appid>")
+  .option("-s, --scope <scope>", "the scope to tail", "application", "channels")
+  .option("-c, --channel <channel>", "the channel to tail")
+  .option("-r, --raw", "display logs in raw json")
+  .description("Tail Ably events in real time")
+  .action(async (appid, options, command) => {
+    switch (options.scope) {
+      case "application":
+        tailApplication(appid);
+        break;
+      case "channels":
+        tailChannels(appid, options.channel);
+        break;
+      default:
+        console.log("No scope provided");
+    }
   });
 
 program
   //how do I add optional parameters like channel
-  .command("tail")
+  .command("stats")
   .argument("<appid>")
-  .option("-c, --channel <name>", "name of the channel to watch")
-  .description("Watch application events in real time")
-  .action(async (app) => {
-
-    defaultColumnOptions.columns = ['timestamp','name','transport']
-    console.log(columnify({}, defaultColumnOptions))
-
-    //app connection events
-    var connections = new EventSource(
-      `https://realtime.ably.io/sse?v=1.2&channels=[app:${app}:meta]connection.lifecycle&key=${ABLY_API_KEY}`
-    );
-    connections.addEventListener("message", function (e) {
-      let msg = JSON.parse(e.data);
-      //console.log(JSON.parse(msg.data).transport.type)
-      //map data object into a flattened display object
-      let mapped = {
-          timestamp: msg.timestamp,
-          name: msg.name,
-          transport: JSON.parse(msg.data).transport.type
-        }
-
-      defaultColumnOptions.showHeaders = false;
-      defaultColumnOptions.truncate = true;
-      console.log(columnify([mapped], defaultColumnOptions))
-      //console.log(e.data);
-      //console.log(table.toString())
-    });
-    connections.onerror = function (err) {
-      if (err) {
-        if (err.status === 401 || err.status === 403) {
-          console.log("not authorized");
-        }
-      }
-    };
-
-
-    //channel
-    var channels = new EventSource(`https://realtime.ably.io/sse?v=1.2&channels=[app:${app}:meta]channel.lifecycle&key=${ABLY_API_KEY}`)
-    channels.addEventListener('message', function (e) {
-     console.log(e.data)
-    })
-    channels.onerror = function (err) {
-      if (err) {
-        if (err.status === 401 || err.status === 403) {
-          console.log('not authorized');
-        }
-      }
-    };
-
-    while (true) {
-      await sleep(STREAMING_DELAY_IN_SECONDS * 1000);
-    }
+  .action(async (appid, options, command) => {
+    statsApplication(appid);
   });
 
 program.parse(process.argv);
