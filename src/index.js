@@ -1,8 +1,8 @@
 import { program } from "commander";
 import 'dotenv/config'
-import { tailApplication } from "./tailApplication.js";
-import { tailChannels } from "./tailChannels.js";
-import { statsApplication } from "./statsApplication.js";
+import { tailApplication } from "./commands/tail/application.js";
+import { tailChannels } from "./commands/tail/channels.js";
+import { statsApplication } from "./commands/stats/application.js";
 
 program
   .name("ablycli")
@@ -37,5 +37,22 @@ program
   .action(async (appid, options, command) => {
     statsApplication(appid);
   });
+
+//TODO:
+
+//add Ably key storage - using keytar?
+//switch between app keys
+
+//other commands
+// publish
+// - single messages
+// - 
+
+//presence
+
+//templates
+// - pull from starter kits
+
+
 
 program.parse(process.argv);

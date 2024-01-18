@@ -7,7 +7,7 @@ export const statsApplication = async (appid) => {
   printTable();
 
   var connections = new EventSource(
-    `https://realtime.ably.io/sse?v=1.2&channels=[meta]stats:minute&key=${process.env.ABLY_API_KEY}`
+    `https://realtime.ably.io/sse?v=1.2&channels=[meta]stats:minute&rewind=1&key=${process.env.ABLY_API_KEY}`
   );
   connections.addEventListener("message", outputApplicationLog);
   connections.onerror = outputApplicationError;
